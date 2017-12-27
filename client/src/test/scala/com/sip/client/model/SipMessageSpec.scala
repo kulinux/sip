@@ -17,6 +17,20 @@ object DummyMessage {
       SipHeader("Content-Length", "142")
     )
   )
+
+  val SipMessageRegister = SipMessage(
+    SipHead("REGISTER sips:ss2.biloxi.example.com SIP/2.0"),
+    List(
+      SipHeader("Via","SIP/2.0/TLS client.biloxi.example.com:5061 ;branch=z9hG4bKnashds7"),
+      SipHeader("Max-Forwards", "70"),
+      SipHeader("From", "Bob <sips:bob@biloxi.example.com>;tag=a73kszlfl"),
+      SipHeader("To", "Bob <sips:bob@biloxi.example.com>"),
+      SipHeader("Call-ID", "1j9FpLxk3uxtm8tn@biloxi.example.com"),
+      SipHeader("CSeq","1 REGISTER"),
+      SipHeader("Contact","<sips:bob@client.biloxi.example.com>"),
+      SipHeader("Content-Length","0")
+    )
+  )
 }
 
 class SipMessageSpec extends FlatSpec with Matchers {

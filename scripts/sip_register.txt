@@ -1,0 +1,14 @@
+REGISTER sip:localhost SIP/2.0
+Via: SIP/2.0/UDP 192.168.1.131:5060;rport;branch=z9hG4bKPj2lwBVOl6QgeUE6-YZ81mtbVI6IRIjk3e
+Max-Forwards: 70
+From: <sip:dos@localhost>;tag=TSR4ttPohOCxJPtf7wKiQT2e-pZh1AtL
+To: <sip:dos@localhost>
+Call-ID: Ts-Dmd.qrkzeLhQXc6L6PhKSb4QKNaDN
+CSeq: 19532 REGISTER
+User-Agent: AGEphone/1.1.0 (Darwin10.13.2; x86_64)
+Contact: <sip:dos@192.168.1.131:5060;ob>
+Expires: 600
+Allow: PRACK, INVITE, ACK, BYE, CANCEL, UPDATE, INFO, NOTIFY, REFER, MESSAGE, OPTIONS
+Content-Length:  0
+
+

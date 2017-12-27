@@ -32,7 +32,7 @@ object SipMarshallers {
       val sheader = implicitly[SipMarshaller[SipHead]]
 
       sh.write(a.head) + "\n" +
-        a.headers.map( x => x.key + ":" + x.value ).mkString("\n") +
+        a.headers.map( x => x.key + ": " + x.value ).mkString("\n") +
         "\n\n"
 
     }

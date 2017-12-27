@@ -12,7 +12,7 @@ object SipClientIt extends App {
   import com.sip.client.model.SipMarshallers._
 
 
-  val req = DummyMessage.SipMessageSample
+  val req = DummyMessage.SipMessageRegister
 
   implicit val udp : UdpClient = new UdpClient("localhost", 5060)
 
