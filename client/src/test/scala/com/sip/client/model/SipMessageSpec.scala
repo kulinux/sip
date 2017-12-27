@@ -19,16 +19,19 @@ object DummyMessage {
   )
 
   val SipMessageRegister = SipMessage(
-    SipHead("REGISTER sips:ss2.biloxi.example.com SIP/2.0"),
+    SipHead("REGISTER sip:localhost SIP/2.0"),
     List(
-      SipHeader("Via","SIP/2.0/TLS client.biloxi.example.com:5061 ;branch=z9hG4bKnashds7"),
+      SipHeader("Via","SIP/2.0/UDP 192.168.1.131:5060;rport;branch=z9hG4bKPjQFoKOaWo1YxFrUWBYOAUrqRvRqPSBjtA"),
       SipHeader("Max-Forwards", "70"),
-      SipHeader("From", "Bob <sips:bob@biloxi.example.com>;tag=a73kszlfl"),
-      SipHeader("To", "Bob <sips:bob@biloxi.example.com>"),
-      SipHeader("Call-ID", "1j9FpLxk3uxtm8tn@biloxi.example.com"),
-      SipHeader("CSeq","1 REGISTER"),
-      SipHeader("Contact","<sips:bob@client.biloxi.example.com>"),
-      SipHeader("Content-Length","0")
+      SipHeader("From", "<sip:dos@localhost>;tag=mKVbNF0J4ewfsR75PaDqOq2hwET0fe5P"),
+      SipHeader("To", "<sip:dos@localhost>"),
+      SipHeader("Call-ID", "6L.VRwAZl2RxelodioGGt-Ws42WBxXEI"),
+      SipHeader("CSeq","13328 REGISTER"),
+      SipHeader("User-Agent", "AGEphone/1.1.0 (Darwin10.13.2; x86_64)"),
+      SipHeader("Contact","<sip:dos@192.168.1.131:5060;ob>"),
+      SipHeader("Expires","600"),
+      SipHeader("Allow", "PRACK, INVITE, ACK, BYE, CANCEL, UPDATE, INFO, NOTIFY, REFER, MESSAGE, OPTIONS"),
+      SipHeader("Content-Length", "0")
     )
   )
 }
