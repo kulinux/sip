@@ -39,38 +39,3 @@ object SipMarshallers {
   }
 }
 
-
-
-class SipInviteRequest {
-
-  var from : String  = ""
-  var to : String = ""
-  var contact : String = ""
-  var allow : String = ""
-
-  def from(str: String) : SipInviteRequest = {
-    from = str
-    this
-  }
-
-  def to(str: String) : SipInviteRequest = {
-    to = str
-    this
-  }
-
-  def contact(str: String) : SipInviteRequest = {
-    contact = str
-    this
-  }
-
-  def allowAll() = {
-    allow = "ACK, BYE, CANCEL, INFO, INVITE, NOTIFY, OPTIONS, PRACK, REFER, REGISTER, SUBSCRIBE, UPDATE"
-    this
-  }
-
-}
-
-
-class SipResponse {
-
-}

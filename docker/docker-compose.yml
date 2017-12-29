@@ -1,0 +1,6 @@
+version: '3'
+services:
+  asterisk:
+    image: dougbtv/asterisk
+    ports:
+    - "5060:5060/udp"

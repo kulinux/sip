@@ -6,11 +6,6 @@ import com.sip.client.model._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object RequestBuilder {
-  def invite() = new SipInviteRequest
-}
-
-
 
 class SipClient {
 
@@ -18,9 +13,8 @@ class SipClient {
     ( implicit udp: UdpClient,
       ms: SipMarshaller[SipMessage] ) : Future[SipMessage] =  {
 
-    udp.send( ms.write(req).getBytes )
-      .flatMap( u => udp.receive(str => str.length > 5) )
-      .flatMap( u => udp.close() )
+    udp.sendAndReceive( ms.write(req) )
+        .onComplete( x => println(x) )
 
     Future.successful(SipMessage(SipHead(""), List()))
   }
