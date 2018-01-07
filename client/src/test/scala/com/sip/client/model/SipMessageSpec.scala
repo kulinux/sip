@@ -36,21 +36,9 @@ object DummyMessage {
   )
 }
 
-class SipMessageSpec extends FlatSpec with Matchers {
+class SipMessageSerializeSpec extends FlatSpec with Matchers {
 
   import com.sip.client.model.SipMarshallers._
-
-  /*
-INVITE sip:user2@server2.com SIP/2.0
-Via: SIP/2.0/UDP pc33.server1.com;branch=z9hG4bK776asdhds Max-Forwards: 70
-To: user2 <sip:user2@server2.com>
-From: user1 <sip:user1@server1.com>;tag=1928301774
-Call-ID: a84b4c76e66710@pc33.server1.com
-CSeq: 314159 INVITE
-Contact: <sip:user1@pc33.server1.com>
-Content-Type: application/sdp
-Content-Length: 142
-   */
 
   def write(sm: SipMessage)(implicit m : SipMarshaller[SipMessage]) = m.write(sm)
 
@@ -58,5 +46,28 @@ Content-Length: 142
     println( write( DummyMessage.SipMessageSample ))
   }
 
+}
 
+
+class SipMessUnSerializeSpec extends FlatSpec with Matchers {
+  val message =
+    """SIP/2.0 401 Unauthorized
+      |Via: SIP/2.0/UDP 192.168.1.131:5060;branch=z9hG4bKPjQFoKOaWo1YxFrUWBYOAUrqRvRqPSBjt;received=172.18.0.1;rport=56390
+      |From: <sip:uno@localhost>;tag=mKVbNF0J4ewfsR75PaDqOq2hwET0fe5W
+      |To: <sip:uno@localhost>;tag=as529ae190
+      |Call-ID: 6L.VRwAZl2RxelodioGGt-Ws42WBxXEW
+      |CSeq: 13328 REGISTER
+      |Server: Asterisk PBX certified/11.6-cert16
+      |Allow: INVITE, ACK, CANCEL, OPTIONS, BYE, REFER, SUBSCRIBE, NOTIFY, INFO, PUBLISH
+      |Supported: replaces, timer
+      |WWW-Authenticate: Digest algorithm=MD5, realm="asterisk", nonce="7e8a0c48"
+      |Content-Length: 0
+    """.stripMargin
+
+  "A message" should "deserialize" in {
+    println(message)
+    val parsedMsg = SipMarshallers.parse(message)
+
+    println(parsedMsg)
+  }
 }

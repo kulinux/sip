@@ -21,7 +21,7 @@ class UdpClient(host: String, port: Int) {
     val receiveData = new Array[Byte](50)
     val receivePacket: DatagramPacket = new DatagramPacket(receiveData, receiveData.length)
 
-    while( until.apply( str ) == false ) {
+    while( !until.apply(str) ) {
       socket.receive(receivePacket)
       str = str +
         receivePacket.getData().take( receivePacket.getLength ).map(_.toChar).mkString
