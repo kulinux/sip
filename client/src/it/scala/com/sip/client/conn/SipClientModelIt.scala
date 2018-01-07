@@ -10,7 +10,7 @@ import scala.concurrent.Future
 object SipClientModelIt extends App {
 
   import com.sip.client.model.SipRequestMarshallers._
-  import com.sip.client.model.SipMarshallers._
+  import com.sip.client.model.marshaller.SipMarshallers._
 
   def write(sm: SipInviteRequest)(implicit m : SipRequestMarshaller[SipInviteRequest]) = m.marshall(sm)
   def write(sm: SipRegisterRequest)(implicit m : SipRequestMarshaller[SipRegisterRequest]) = m.marshall(sm)

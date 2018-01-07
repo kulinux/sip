@@ -9,7 +9,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 object SipClientIt extends App {
 
-  import com.sip.client.model.SipMarshallers._
+  import com.sip.client.model.marshaller.SipMarshallers._
 
 
   val req = DummyMessage.SipMessageRegister

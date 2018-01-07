@@ -2,6 +2,7 @@ package com.sip.client
 
 import com.sip.client.conn.UdpClient
 import com.sip.client.model._
+import com.sip.client.model.marshaller.SipMarshaller
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

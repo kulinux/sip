@@ -1,5 +1,7 @@
 package com.sip.client.model
 
+import com.sip.client.model.marshaller.SipMarshaller
+import com.sip.client.model.unmarshaller.SipUnmarshallers
 import org.scalatest.{FlatSpec, Matchers}
 
 object DummyMessage {
@@ -38,7 +40,7 @@ object DummyMessage {
 
 class SipMessageSerializeSpec extends FlatSpec with Matchers {
 
-  import com.sip.client.model.SipMarshallers._
+  import com.sip.client.model.marshaller.SipMarshallers._
 
   def write(sm: SipMessage)(implicit m : SipMarshaller[SipMessage]) = m.write(sm)
 
@@ -66,8 +68,9 @@ class SipMessUnSerializeSpec extends FlatSpec with Matchers {
 
   "A message" should "deserialize" in {
     println(message)
-    val parsedMsg = SipMarshallers.parse(message)
+    val parsedMsg = SipUnmarshallers.parse(message)
 
-    println(parsedMsg)
+    assert(parsedMsg.head.asInstanceOf[SipHeaderResponse].status == 401)
+
   }
 }
