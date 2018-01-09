@@ -1,5 +1,7 @@
 package com.sip.client.model
 
+import java.util.UUID
+
 case class WhoAmI(user: String, contact: String, ip: String, port: Int = 5060)
 case class SipServer(ip: String)
 
@@ -13,7 +15,7 @@ object SipRequestMarshallers {
     SipHeader("Max-Forwards", "70"),
     SipHeader("From", s"<sip:${a.whoAmI.user}>;tag=mKVbNF0J4ewfsR75PaDqOq2hwET0fe5W"),
     SipHeader("To", s"<sip:${a.whoAmI.user}>"),
-    SipHeader("Call-ID", "6L.VRwAZl2RxelodioGGt-Ws42WBxXEW"),
+    SipHeader("Call-ID", UUID.randomUUID().toString),
     SipHeader("Contact",s"<sip:${a.whoAmI.contact}:${a.whoAmI.port};ob>"),
     SipHeader("Expires","600"),
     SipHeader("Allow", "PRACK, INVITE, ACK, BYE, CANCEL, UPDATE, INFO, NOTIFY, REFER, MESSAGE, OPTIONS"),

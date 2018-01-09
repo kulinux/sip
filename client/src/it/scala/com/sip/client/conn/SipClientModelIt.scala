@@ -5,6 +5,8 @@ import com.sip.client.model._
 
 import scala.concurrent.Future
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 
 
 object SipClientModelIt extends App {
@@ -18,7 +20,6 @@ object SipClientModelIt extends App {
   val sipServer = SipServer("192.168.1.131")
   val whoAmI = WhoAmI("uno@localhost", "uno@192.168.1.131", "192.168.1.131")
 
-  //val register = SipInviteRequest(sipServer, whoAmI)
   val register = SipRegisterRequest(sipServer, whoAmI)
 
   val sipMessage = write(register)
@@ -28,6 +29,17 @@ object SipClientModelIt extends App {
   val sc = new SipClient()
   val resp : Future[SipMessage] = sc.request(sipMessage)
 
-  Thread.sleep(5000)
+  def authenticate(rsp: SipMessage) : SipMessage = rsp
+
+  resp
+    .filter( _.head.asInstanceOf[SipHeaderResponse].status == 401 )
+    .map( authenticate(_) )
+      .map( x => sc.request(x) )
+
+  println()
+
+  resp.onComplete(println(_))
+
+  Thread.sleep(500000)
 
 }
