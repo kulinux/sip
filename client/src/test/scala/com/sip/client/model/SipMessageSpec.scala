@@ -2,6 +2,7 @@ package com.sip.client.model
 
 import com.sip.client.model.marshaller.SipMarshaller
 import com.sip.client.model.unmarshaller.SipUnmarshallers
+import com.sip.client.model.unmarshaller.SipUnmarshallers.headerPfWWWAuthentication
 import org.scalatest.{FlatSpec, Matchers}
 
 object DummyMessage {
@@ -63,8 +64,7 @@ class SipMessUnSerializeSpec extends FlatSpec with Matchers {
       |Allow: INVITE, ACK, CANCEL, OPTIONS, BYE, REFER, SUBSCRIBE, NOTIFY, INFO, PUBLISH
       |Supported: replaces, timer
       |WWW-Authenticate: Digest algorithm=MD5, realm="asterisk", nonce="7e8a0c48"
-      |Content-Length: 0
-    """.stripMargin
+      |Content-Length: 0""".stripMargin
 
   "A message" should "deserialize" in {
     println(message)
@@ -72,5 +72,12 @@ class SipMessUnSerializeSpec extends FlatSpec with Matchers {
 
     assert(parsedMsg.head.asInstanceOf[SipHeaderResponse].status == 401)
 
+  }
+
+  "A www authenticate" should "deserialized" in {
+    val message =
+      """WWW-Authenticate: Digest algorithm=MD5, realm="asterisk", nonce="7e8a0c48"""
+
+    SipUnmarshallers.headerPfWWWAuthentication(SipUnmarshallers.headerPf(message))
   }
 }

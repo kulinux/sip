@@ -1,26 +1,35 @@
 package com.sip.client.model.marshaller
 
-import com.sip.client.model.{BaseSipHead, SipHeader, SipMessage}
+import com.sip.client.model._
 
 object SipMarshallers {
 
-  implicit object SipHeadMarshaller extends  SipMarshaller[BaseSipHead] {
-    override def write(a: BaseSipHead): String = a.head
+  implicit object SipHeadMarshaller extends  SipMarshaller[SipHead] {
+    override def write(a: SipHead): String = a.head
   }
 
   implicit object SipHeaderMarshaller extends SipMarshaller[SipHeader] {
     override def write(a: SipHeader): String =   a.key + ":" + a.value
   }
 
+  implicit object BaseSipHeaderMarshaller extends SipMarshaller[BaseSipHeader] {
+    override def write(a: BaseSipHeader): String =   ""
+  }
+
+
   implicit object SipMessageMarshaller extends SipMarshaller[SipMessage] {
+
+    def write[A](a: A)(implicit sh: SipMarshaller[A]) : String = sh.write(a)
+
+    def writeSipHead( sh : BaseSipHead): String = {
+     if( sh.isInstanceOf[SipHead] )  write( sh.asInstanceOf[SipHead] )
+     ""
+    }
+
+
     override def write(a: SipMessage) = {
-      val sh = implicitly[SipMarshaller[BaseSipHead]]
-      val sheader = implicitly[SipMarshaller[BaseSipHead]]
-
-      sh.write(a.head) + "\n" +
-        a.headers.map( x => x.key + ": " + x.value ).mkString("\n") +
-        "\n\n"
-
+      writeSipHead(a.head) +
+      a.headers.map( x => write(x) ).mkString("\n") + "\n\n"
     }
   }
 
