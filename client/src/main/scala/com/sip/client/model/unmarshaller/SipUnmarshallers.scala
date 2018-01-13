@@ -49,8 +49,8 @@ object SipUnmarshallers {
        .map( x => (x.split("=")(0).trim, x.split("=")(1) ) )
        .map( x => x match {
          case ("Digest algorithm", x) => dc = x
-         case ("realm", x) => dc = x
-         case ("nonce", x) => dc = x
+         case ("realm", x) => realm = x
+         case ("nonce", x) => nounce = x
        } )
       SHWWWAuthenticate(dc, realm, nounce)
     }
