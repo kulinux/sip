@@ -1,29 +1,22 @@
 package com.sip.client.model
 
 
-trait Sip
+sealed abstract class Sip
 
-trait BaseSipHead {
-  def head: String
-}
+case class SipHeader(key: String, value: String) extends Sip
 
-trait BaseSipHeader
-
-case class SipHeader(key: String, value: String) extends BaseSipHeader
-
-case class SipHead(head: String) extends BaseSipHead
 
 case class SipHeaderResponse(
     head: String,
-    status: Int ) extends BaseSipHead
+    status: Int ) extends Sip
 
 case class SHWWWAuthenticate(digest: String, realm: String, nounce: String)
-  extends BaseSipHeader
+  extends Sip
 
 
 case class SipMessage(
-    head: BaseSipHead,
-    headers: List[BaseSipHeader]) extends Sip
+    head: Sip,
+    headers: List[Sip]) extends Sip
 
 
 

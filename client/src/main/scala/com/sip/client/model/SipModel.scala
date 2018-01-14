@@ -25,7 +25,7 @@ object SipRequestMarshallers {
   implicit object SipInviteRequestMarshaller extends SipRequestMarshaller[SipInviteRequest] {
     override def marshall(a: SipInviteRequest): SipMessage = {
       SipMessage(
-        SipHead(s"INVITE sip:${a.sipServer.ip} SIP/2.0"),
+        SipHeader(s"INVITE sip:${a.sipServer.ip} SIP/2.0", ""),
         commonHeader(a) :+ SipHeader("CSeq","13328 INVITE")
       )
     }
@@ -35,7 +35,7 @@ object SipRequestMarshallers {
   implicit object SipRegisterRequestMarshaller extends SipRequestMarshaller[SipRegisterRequest] {
     override def marshall(a: SipRegisterRequest): SipMessage = {
       SipMessage(
-        SipHead(s"REGISTER sip:${a.sipServer.ip} SIP/2.0"),
+        SipHeader(s"REGISTER sip:${a.sipServer.ip} SIP/2.0", ""),
         commonHeader(a) :+ SipHeader("CSeq","13328 REGISTER")
       )
     }
