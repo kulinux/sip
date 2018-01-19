@@ -66,6 +66,8 @@ class SipMessUnSerializeSpec extends FlatSpec with Matchers {
 
     assert(parsedMsg.head.asInstanceOf[SipHeaderResponse].status == 401)
 
+    println()
+
     val msgStr = SipM.write( parsedMsg )
     println(msgStr)
 
