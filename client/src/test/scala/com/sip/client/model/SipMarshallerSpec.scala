@@ -15,7 +15,8 @@ class SipMarshallerSpec extends FlatSpec with Matchers {
   "A SipRegister" should "be serialized" in {
     val sipRegister = SipRegister(
       HeaderRegister("localhost"),
-      MaxForwards(70),
+      Via("192.168.1.132", 60026, "z9hG4bKPjaO-dZauc9Ep4Mlalnq3m3ZD2HSGJtrXY", None, None),
+      MaxForward(70),
       From("dos@localhost", "JgsOX.QTyT3cy-ecmWnMpV3PF8IjeUZB"),
       To("dos@localhost"),
       CallId("dwCHaLd6VNXbcmBHJelyTgPRmFy8iB6p"),

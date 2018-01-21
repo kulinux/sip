@@ -27,7 +27,6 @@ Content-Length: 0
 
 object Header {
 
-  case class MaxForwards(maxForwards: Int)
   case class From(from: String, tag: String)
   case class To(to: String)
   case class CallId(callId: String)
@@ -37,7 +36,8 @@ object Header {
   case class Expires(expires: Int)
   case class Allow(allows: Seq[String])
   case class ContentLength(cl: Int)
-  case class Via(ip: String, port: String, branch: String, received: String, rport: Int)
+  case class MaxForward(mf: Int)
+  case class Via(ip: String, port: Int, branch: String, received: Option[String], rport: Option[Int])
   case class Server(server: String)
   case class Supported(sp: Seq[String])
   case class WAuthenticate(digest: String, real: String, nonce: String)
@@ -64,7 +64,8 @@ object SipMessages {
 
   case class SipRegister (
     head: HeaderRegister,
-    maxForwards: MaxForwards,
+    via: Via,
+    maxForwards: MaxForward,
     from: From,
     to: To,
     callId: CallId,
