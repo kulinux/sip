@@ -11,7 +11,7 @@ object Head {
 object Header {
 
   case class From(from: String, tag: String)
-  case class To(to: String)
+  case class To(to: String, tag: String)
   case class CallId(callId: String)
   case class CSeq(cSeq: String)
   case class UserAgent(userAgent: String)

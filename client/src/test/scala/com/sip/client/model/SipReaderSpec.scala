@@ -19,12 +19,28 @@ class SipReaderSpec extends FlatSpec with Matchers {
 
   "Marshaller" should "read msg" in {
     val msg = SipMarshaller.read(msgStr)
+    println(msg)
+  }
+
+  "Marshaller" should "read Viaheader" in {
+    var header = "Via: SIP/2.0/UDP 192.168.1.132:60026;branch=z9hG4bKPjaO-dZauc9Ep4Mlalnq3m3ZD2HSGJtrXY;received=172.18.0.1;rport=49942"
+
+    val via = Readers.via(Seq(header))
+    via.get.port should be (60026)
+
   }
 
   "Marshaller" should "read authentication header" in {
     val authStr = """WWW-Authenticate: Digest algorithm=MD5, realm="asterisk", nonce="211fd4cd""""
     val auth = Readers.wWWAuthenticate( Seq(authStr) )
-    println(auth)
+
+    auth.isDefined should be (true)
+    auth.get should have (
+      'digest ("MD5"),
+      'real ("asterisk"),
+      'nonce ("211fd4cd")
+    )
+
   }
 
 
