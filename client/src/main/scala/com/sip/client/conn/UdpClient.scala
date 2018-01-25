@@ -5,7 +5,7 @@ import java.net.{DatagramPacket, DatagramSocket, InetAddress, InetSocketAddress}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class UdpClient(host: String, port: Int) {
+class UdpClient(host: String, port: Int = 5060) {
 
   val socket = new DatagramSocket()
   val address = new InetSocketAddress(host, port)
