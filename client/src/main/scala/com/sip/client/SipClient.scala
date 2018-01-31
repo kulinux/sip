@@ -6,10 +6,14 @@ import com.sip.client.conn.UdpClient
 import com.sip.client.model.Head.HeaderRegister
 import com.sip.client.model.Header._
 import com.sip.client.model.{SipMarshaller, Writers}
-import com.sip.client.model.SipMessages.SipRegister
+import com.sip.client.model.SipMessages.{SipRegister, SipResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import Writers._
+import com.sip.client.util.Util
+
+import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
 class SipClient(server: String) {
 
@@ -34,16 +38,69 @@ class SipClient(server: String) {
     )
 
     val udpClient = new UdpClient(server)
+
     val rsp =
       udpClient.sendAndReceive(SipMarshaller.write(sipRegister))
         .map( SipMarshaller.read )
+        .flatMap( x => x match {
+            case a: SipResponse if(a.sipResponse.code == 401) =>
+              authenticate(udpClient, sipRegister, x, "uno", "uno", "sip:localhost")
+            case a: SipResponse if(a.sipResponse.code == 201) => Future(x)
+          });
 
 
-    rsp.onComplete( x => println(x.get) )
+    rsp.onComplete(
+      x => x match {
+        case Failure(a) => a.printStackTrace()
+        case Success(a) => println(a)
+      }
+    )
 
-    Thread.sleep(1000)
 
+    Thread.sleep(10000)
+  }
 
+  def authenticate(
+                 udpClient: UdpClient,
+                 req: SipRegister,
+                 rsp: SipResponse,
+                 username: String,
+                 pwd: String,
+                 uri: String): Future[SipResponse] = {
+    val wauth = rsp.wWWAuthenticate
+    val response = Util.digest(
+      wauth.get.real,
+      wauth.get.nonce,
+      username,
+      pwd,
+      "REGISTER",
+      uri )
+
+    val authorization = Some(Authorization(
+      username,
+      wauth.get.real,
+      wauth.get.nonce,
+      uri,
+      response,
+      "MD5" ))
+
+    val sipRegister = SipRegister(
+      req.head,
+      req.via,
+      req.maxForwards,
+      req.from,
+      req.to,
+      req.callId,
+      req.cseq,
+      req.userAgent,
+      req.contact,
+      req.expires,
+      req.allow,
+      req.contentLength,
+      authorization )
+
+    udpClient.sendAndReceive(SipMarshaller.write(sipRegister))
+      .map( SipMarshaller.read )
   }
 
 

@@ -22,7 +22,7 @@ object Read {
       server(tokens.tail).get,
       allow(tokens.tail).get,
       supported(tokens.tail).get,
-      wWWAuthenticate(tokens.tail).get,
+      wWWAuthenticate(tokens.tail),
       contentLength(tokens.tail).get
     )
   }
@@ -31,9 +31,9 @@ object Read {
 object Readers {
 
   def headResponse(a: String) : HeaderResponse = {
-    val pat = raw"SIP/2.0 (\w+) (\w+)".r
+    val pat = raw"SIP/2.0 (.+) (.+)".r
 
-    a match {
+    a.trim match {
       case pat(a, b) => HeaderResponse(a.toInt, b)
       case _ => HeaderResponse(0, "")
     }
@@ -58,7 +58,7 @@ object Readers {
     str,
     "WWW-Authenticate",
     raw"""Digest algorithm=(\w+), realm="(\w+)", nonce="(\w+)"""".r,
-    a => WAuthenticate(a(0), a(1), a(2)) )
+    a => WAuthenticateChallenge(a(0), a(1), a(2)) )
 
   def via(str: Seq[String]) = header(
     str,

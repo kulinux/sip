@@ -35,11 +35,14 @@ object Writers {
   implicit val expires =  new SimpleHeader[Expires]("Expires", _.expires.toString)
   implicit val allow =  new SimpleHeader[Allow]("Allow", _.allows.mkString(","))
   implicit val cl = new SimpleHeader[ContentLength]("Content-Length", _.cl.toString)
+  implicit val auth = new SimpleHeader[Authorization]("Authorization",
+    x => s"""Digest username="${x.username}", realm="${x.real}", nonce="${x.nonce}", uri="${x.uri}", response="${x.response}", algorithm=${x.algorithm}""" )
 
 
   implicit object SipRegisterW extends Writer[SipRegister] {
-    override def write(a: SipRegister): String =
-      SipMarshaller.write(a.head) + "\n" +
+    override def write(a: SipRegister): String = {
+
+      var res = SipMarshaller.write(a.head) + "\n" +
         SipMarshaller.write(a.via) + "\n" +
         SipMarshaller.write(a.maxForwards) + "\n" +
         SipMarshaller.write(a.from) + "\n" +
@@ -51,6 +54,14 @@ object Writers {
         SipMarshaller.write(a.expires) + "\n" +
         SipMarshaller.write(a.allow) + "\n" +
         SipMarshaller.write(a.contentLength) + "\n"
+
+      if(a.authorization.isDefined) {
+        res = res + SipMarshaller.write(a.authorization.get) + "\n"
+      }
+
+
+      res
+    }
   }
 
 }
