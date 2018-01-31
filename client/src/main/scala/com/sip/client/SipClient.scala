@@ -26,7 +26,7 @@ class SipClient(server: String) {
       HeaderRegister(server),
       Via(userIp, 60026, viaId, None, None),
       MaxForward(70),
-      From(user, "JgsOX.QTyT3cy-ecmWnMpV3PF8IjeUZB"),
+      From(user, UUID.randomUUID().toString),
       To(user, ""),
       CallId(callId),
       CSeq("25762 REGISTER"),
