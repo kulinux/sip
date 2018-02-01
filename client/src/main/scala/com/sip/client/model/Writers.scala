@@ -1,8 +1,8 @@
 package com.sip.client.model
 
-import com.sip.client.model.Head.HeaderRegister
+import com.sip.client.model.Head.{HeaderInvite, HeaderRegister}
 import com.sip.client.model.Header._
-import com.sip.client.model.SipMessages.SipRegister
+import com.sip.client.model.SipMessages.{CommonRequestHeader, SipInvite, SipRegister}
 
 
 trait Writer[A] {
@@ -24,6 +24,10 @@ object Writers {
     override def write(a: HeaderRegister): String = s"REGISTER sip:${a.server} SIP/2.0"
   }
 
+  implicit object HeaderInviteW extends Writer[HeaderInvite] {
+    override def write(a: HeaderInvite): String = s"INVITE sip:${a.user} SIP/2.0"
+  }
+
   implicit val via = new SimpleHeader[Via]("Via", x => s"SIP/2.0/UDP ${x.ip}:${x.port};rport;branch=${x.branch}")
   implicit val maxForward = new SimpleHeader[MaxForward]("MaxForward", _.mf.toString)
   implicit val from = new SimpleHeader[From]("From",  x => s"<sip:${x.from}>;tag=${x.tag}" )
@@ -39,27 +43,39 @@ object Writers {
     x => s"""Digest username="${x.username}", realm="${x.real}", nonce="${x.nonce}", uri="${x.uri}", response="${x.response}", algorithm=${x.algorithm}""" )
 
 
+  def writeRequestCommonHeader(a: CommonRequestHeader) = {
+    SipMarshaller.write(a.via) + "\n" +
+      SipMarshaller.write(a.maxForwards) + "\n" +
+      SipMarshaller.write(a.from) + "\n" +
+      SipMarshaller.write(a.to) + "\n" +
+      SipMarshaller.write(a.callId) + "\n" +
+      SipMarshaller.write(a.cseq) + "\n" +
+      SipMarshaller.write(a.userAgent) + "\n" +
+      SipMarshaller.write(a.contact) + "\n" +
+      SipMarshaller.write(a.expires) + "\n" +
+      SipMarshaller.write(a.allow) + "\n" +
+      SipMarshaller.write(a.contentLength)
+  }
+
   implicit object SipRegisterW extends Writer[SipRegister] {
     override def write(a: SipRegister): String = {
-
       var res = SipMarshaller.write(a.head) + "\n" +
-        SipMarshaller.write(a.via) + "\n" +
-        SipMarshaller.write(a.maxForwards) + "\n" +
-        SipMarshaller.write(a.from) + "\n" +
-        SipMarshaller.write(a.to) + "\n" +
-        SipMarshaller.write(a.callId) + "\n" +
-        SipMarshaller.write(a.cseq) + "\n" +
-        SipMarshaller.write(a.userAgent) + "\n" +
-        SipMarshaller.write(a.contact) + "\n" +
-        SipMarshaller.write(a.expires) + "\n" +
-        SipMarshaller.write(a.allow) + "\n" +
-        SipMarshaller.write(a.contentLength) + "\n"
-
+       writeRequestCommonHeader(a) + "\n"
       if(a.authorization.isDefined) {
         res = res + SipMarshaller.write(a.authorization.get) + "\n"
       }
+      res
+    }
+  }
 
-
+  implicit object SipInviteW extends Writer[SipInvite] {
+    override def write(a: SipInvite): String = {
+      var res = SipMarshaller.write(a.head) + "\n" +
+        writeRequestCommonHeader(a) + "\n"
+      if(a.authorization.isDefined) {
+        res = res + SipMarshaller.write(a.authorization.get) + "\n"
+      }
+      res = res + a.sdp.sdp.map( x => x.key + "=" + x.value).mkString("\n")
       res
     }
   }

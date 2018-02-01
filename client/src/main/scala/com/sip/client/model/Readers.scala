@@ -106,7 +106,7 @@ object Readers {
     str,
     "Supported",
     raw"""(.+)""".r,
-    a => Supported(a(0).split(", ")) )
+    a => Supported(a(0).split(", ").toList) )
 
   def contentLength(str: Seq[String]) = header(
     str,
