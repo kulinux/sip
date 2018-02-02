@@ -5,6 +5,7 @@ import com.sip.client.model.Header._
 import com.sip.client.model.SipMessages.{Sdp, SdpItem, SipInvite}
 import org.scalatest.{FlatSpec, Matchers}
 import Writers._
+import ModelUtils._
 
 /*
 INVITE sip:22222@localhost SIP/2.0
@@ -60,7 +61,7 @@ class SipWriterInviteSpec extends FlatSpec with Matchers {
       Some(Authorization("dos", "asterisk", "nonce", "sip:localhost", "XXXXX", "MD5")),
       Supported(List("replaces 100res", "timer")),
       ContentType("application/sdp"),
-      Sdp( List(SdpItem("kkk", "kkk")) )
+      commonSdp("172.18.0.1")
     )
 
     val str = SipMarshaller.write(sipInvite)

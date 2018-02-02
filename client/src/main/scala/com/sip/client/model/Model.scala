@@ -19,7 +19,7 @@ object Header {
   case class Contact(user: String, ip: String, port: Int)
   case class Expires(expires: Int)
   case class Allow(allows: Seq[String])
-  case class ContentLength(cl: Int)
+  case class ContentLength(var cl: Int)
   case class MaxForward(mf: Int)
   case class Via(ip: String, port: Int, branch: String, received: Option[String], rport: Option[Int])
   case class Server(server: String)

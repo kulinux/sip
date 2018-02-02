@@ -70,12 +70,15 @@ object Writers {
 
   implicit object SipInviteW extends Writer[SipInvite] {
     override def write(a: SipInvite): String = {
+      var sdp = a.sdp.sdp.map( x => x.key + "=" + x.value).mkString("\n")
+
+      a.contentLength.cl = sdp.length
       var res = SipMarshaller.write(a.head) + "\n" +
         writeRequestCommonHeader(a) + "\n"
       if(a.authorization.isDefined) {
         res = res + SipMarshaller.write(a.authorization.get) + "\n"
       }
-      res = res + a.sdp.sdp.map( x => x.key + "=" + x.value).mkString("\n")
+      res = res + sdp
       res
     }
   }
