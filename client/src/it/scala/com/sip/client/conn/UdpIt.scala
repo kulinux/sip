@@ -5,7 +5,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 object UdpIt extends App {
 
   val udp = new UdpClient("localhost", 4444)
-  udp.send("hola, udp server!!!!!".getBytes)
+  udp.send("hola, udp sipServer!!!!!".getBytes)
     .flatMap( u => udp.receive(str => str.length > 5) )
     .flatMap( u => udp.close() )
     .onComplete( f => println(f))
@@ -15,7 +15,7 @@ object UdpIt extends App {
 
 object UdpSendAndReceiveIt extends App {
   val udp = new UdpClient("localhost", 4444)
-  udp.sendAndReceive("hola, udp server")
+  udp.sendAndReceive("hola, udp sipServer")
         .onComplete( x => println(x) )
 
   Thread.sleep(1000)
