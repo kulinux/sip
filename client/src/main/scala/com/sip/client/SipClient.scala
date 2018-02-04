@@ -6,7 +6,7 @@ import com.sip.client.conn.UdpClient
 import com.sip.client.model.Head.{HeaderInvite, HeaderRegister}
 import com.sip.client.model.Header._
 import com.sip.client.model.{SipMarshaller, Writers}
-import com.sip.client.model.SipMessages.{SipInvite, SipRegister, SipResponse}
+import com.sip.client.model.SipMessages.{SipInvite, SipRegister, SipRequest, SipResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import Writers._
@@ -22,6 +22,8 @@ case class WhoAmI(user: String, pwd: String, ip: String, userAgent: String)
 
 class SipClient(sipServer: SipServer, whoAmI: WhoAmI) {
 
+  val udpClient = new UdpClient(sipServer.ipServer)
+
   val callId = UUID.randomUUID().toString
   val viaId = UUID.randomUUID().toString
 
@@ -33,7 +35,7 @@ class SipClient(sipServer: SipServer, whoAmI: WhoAmI) {
       HeaderInvite(to),
       Via(whoAmI.ip, 60026, viaId, None, None),
       MaxForward(70),
-      From(whoAmI.user, UUID.randomUUID().toString),
+      From(s"${whoAmI.user}@${whoAmI.ip}", UUID.randomUUID().toString),
       To(s"${whoAmI.user}@${whoAmI.ip}", ""),
       CallId(callId),
       CSeq("25762 INVITE"),
@@ -48,11 +50,15 @@ class SipClient(sipServer: SipServer, whoAmI: WhoAmI) {
       commonSdp("172.18.0.1")
     )
 
-    val udpClient = new UdpClient(sipServer.ipServer)
 
     val rsp =
       udpClient.sendAndReceive(SipMarshaller.write(sipInvite))
         .map( SipMarshaller.read )
+        .flatMap( x => x match {
+          case a: SipResponse if(a.sipResponse.code == 401) =>
+            authenticate(sipInvite, x, "INVITE", s"sip:${to}")
+          case a: SipResponse if(a.sipResponse.code == 201) => Future(x)
+        });
 
     rsp.onComplete(
       x => x match {
@@ -81,14 +87,13 @@ class SipClient(sipServer: SipServer, whoAmI: WhoAmI) {
       ContentLength(0)
     )
 
-    val udpClient = new UdpClient(sipServer.ipServer)
 
     val rsp =
       udpClient.sendAndReceive(SipMarshaller.write(sipRegister))
         .map( SipMarshaller.read )
         .flatMap( x => x match {
             case a: SipResponse if(a.sipResponse.code == 401) =>
-              authenticate(udpClient, sipRegister, x, whoAmI.user, whoAmI.pwd, s"sip:${whoAmI.ip}")
+              authenticate(sipRegister, x, "REGISTER", s"sip:${whoAmI.ip}")
             case a: SipResponse if(a.sipResponse.code == 201) => Future(x)
           });
 
@@ -103,33 +108,52 @@ class SipClient(sipServer: SipServer, whoAmI: WhoAmI) {
   }
 
   def authenticate(
-                 udpClient: UdpClient,
-                 req: SipRegister,
-                 rsp: SipResponse,
-                 username: String,
-                 pwd: String,
-                 uri: String): Future[SipResponse] = {
+                    req: SipRequest,
+                    rsp: SipResponse,
+                    method: String,
+                    uri: String): Future[SipResponse] = {
 
     val wauth = rsp.wWWAuthenticate
 
-    val authorization = autorizationHeader(uri, "REGISTER", wauth.get)
+    val authorization = autorizationHeader(uri, method, wauth.get)
 
-    val sipRegister = SipRegister(
-      req.head,
-      req.via,
-      req.maxForwards,
-      req.from,
-      req.to,
-      req.callId,
-      req.cseq,
-      req.userAgent,
-      req.contact,
-      req.expires,
-      req.allow,
-      req.contentLength,
-      authorization )
+    val authRequest : SipRequest = req match {
+      case sr: SipRegister => SipRegister(
+        sr.head,
+        sr.via,
+        sr.maxForwards,
+        sr.from,
+        sr.to,
+        sr.callId,
+        sr.cseq,
+        sr.userAgent,
+        sr.contact,
+        sr.expires,
+        sr.allow,
+        sr.contentLength,
+        authorization )
+      case sr: SipInvite => SipInvite(
+        sr.head,
+        sr.via,
+        sr.maxForwards,
+        sr.from,
+        sr.to,
+        sr.callId,
+        sr.cseq,
+        sr.userAgent,
+        sr.contact,
+        sr.expires,
+        sr.allow,
+        sr.contentLength,
+        authorization,
+        sr.supported,
+        sr.contentType,
+        sr.sdp
+      )
+    }
 
-    udpClient.sendAndReceive(SipMarshaller.write(sipRegister))
+
+    udpClient.sendAndReceive(SipMarshaller.write(authRequest))
       .map( SipMarshaller.read )
   }
 

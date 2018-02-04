@@ -57,7 +57,7 @@ object SipMessages {
     contentLength: ContentLength
   )
 
-  trait CommonRequestHeader {
+  trait SipRequest {
     val via: Via
     val maxForwards: MaxForward
     val from: From
@@ -69,6 +69,7 @@ object SipMessages {
     val expires: Expires
     val allow: Allow
     val contentLength: ContentLength
+    val authorization: Option[Authorization]
   }
 
   case class SipRegister (
@@ -85,7 +86,7 @@ object SipMessages {
     allow: Allow,
     contentLength: ContentLength,
     authorization: Option[Authorization] = None
-  ) extends CommonRequestHeader
+  ) extends SipRequest
 
   case class SipInvite (
     head: HeaderInvite,
@@ -104,7 +105,7 @@ object SipMessages {
     supported: Supported,
     contentType: ContentType,
     sdp: Sdp
-  ) extends CommonRequestHeader
+  ) extends SipRequest
 
   case class SdpItem(key: String, value: String)
   case class Sdp(sdp: List[SdpItem])

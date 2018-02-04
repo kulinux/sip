@@ -2,7 +2,7 @@ package com.sip.client.model
 
 import com.sip.client.model.Head.{HeaderInvite, HeaderRegister}
 import com.sip.client.model.Header._
-import com.sip.client.model.SipMessages.{CommonRequestHeader, SipInvite, SipRegister}
+import com.sip.client.model.SipMessages.{SipRequest, SipInvite, SipRegister}
 
 
 trait Writer[A] {
@@ -30,8 +30,8 @@ object Writers {
 
   implicit val via = new SimpleHeader[Via]("Via", x => s"SIP/2.0/UDP ${x.ip}:${x.port};rport;branch=${x.branch}")
   implicit val maxForward = new SimpleHeader[MaxForward]("MaxForward", _.mf.toString)
-  implicit val from = new SimpleHeader[From]("From",  x => s"<sip:${x.from}>;tag=${x.tag}" )
-  implicit val to = new SimpleHeader[To]("To",  x => s"<sip:${x.to}>")
+  implicit val from = new SimpleHeader[From]("From",  x => s"sip:${x.from};tag=${x.tag}" )
+  implicit val to = new SimpleHeader[To]("To",  x => s"sip:${x.to}")
   implicit val callId = new SimpleHeader[CallId]("Call-Id", _.callId )
   implicit val cSeq = new SimpleHeader[CSeq]("CSeq", x => s"${x.cSeq}")
   implicit val userAgent = new SimpleHeader[UserAgent]("User-Agent", _.userAgent)
@@ -43,7 +43,7 @@ object Writers {
     x => s"""Digest username="${x.username}", realm="${x.real}", nonce="${x.nonce}", uri="${x.uri}", response="${x.response}", algorithm=${x.algorithm}""" )
 
 
-  def writeRequestCommonHeader(a: CommonRequestHeader) = {
+  def writeRequestCommonHeader(a: SipRequest) = {
     SipMarshaller.write(a.via) + "\n" +
       SipMarshaller.write(a.maxForwards) + "\n" +
       SipMarshaller.write(a.from) + "\n" +
@@ -80,6 +80,15 @@ object Writers {
       }
       res = res + sdp
       res
+    }
+  }
+
+  implicit object SipRequestW extends Writer[SipRequest] {
+    override def write(a: SipRequest): String = {
+      a match {
+        case a: SipInvite => implicitly[Writer[SipInvite]].write( a )
+        case a: SipRegister => implicitly[Writer[SipRegister]].write( a )
+      }
     }
   }
 

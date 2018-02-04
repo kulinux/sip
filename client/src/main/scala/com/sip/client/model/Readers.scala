@@ -69,13 +69,13 @@ object Readers {
   def from(str: Seq[String]) = header(
     str,
     "From",
-    raw"""<sip:(.+)>;tag=(\w+)""".r,
+    raw"""<?sip:(.+)>?;tag=(\w+)""".r,
     a => From(a(0), a(1)) )
 
   def to(str: Seq[String]) = header(
     str,
     "To",
-    raw"""<sip:(.+)>;tag=(\w+)""".r,
+    raw"""<?sip:(.+)>?;tag=(\w+)""".r,
     a => To(a(0), a(1)) )
 
   def callId(str: Seq[String]) = header(
