@@ -7,7 +7,7 @@ object SipClientIt extends App {
   val user = "dos"
   val pwd = "dos"
   val userIp ="192.168.1.132"
-  val myIp  ="localhost"
+  val myIp  ="172.18.0.1"
 
   val sipClient = new SipClient(
     SipServer(server),
