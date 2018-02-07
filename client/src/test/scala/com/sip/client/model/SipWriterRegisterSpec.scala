@@ -25,7 +25,7 @@ Content-Length:  0
 
 
 
-class SipWriterSpec extends FlatSpec with Matchers {
+class SipWriterRegisterSpec extends FlatSpec with Matchers {
 
 
   "A SipRegister" should "be serialized" in {
@@ -38,7 +38,7 @@ class SipWriterSpec extends FlatSpec with Matchers {
       CallId("dwCHaLd6VNXbcmBHJelyTgPRmFy8iB6p"),
       CSeq("25762 REGISTER"),
       UserAgent("AGEphone/1.1.0 (Darwin10.13.2; x86_64)"),
-      Contact("dos", "92.168.1.132", 60026),
+      Contact("dos", "192.168.1.132", 60026),
       Expires(600),
       Allow( Seq("PRACK", "INVITE", "ACK", "BYE", "CANCEL", "UPDATE", "INFO", "NOTIFY", "REFER", "MESSAGE", "OPTIONS") ),
       ContentLength(0)

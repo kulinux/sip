@@ -51,6 +51,8 @@ class UdpClient(host: String, port: Int = 5060) {
     clientSocket.receive(receivePacket)
     val res = new String(receivePacket.getData, 0, receivePacket.getLength)
 
+    println(data)
+    println("*******************")
     println(res)
 
     res

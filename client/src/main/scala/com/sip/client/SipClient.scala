@@ -3,48 +3,97 @@ package com.sip.client
 import java.util.UUID
 
 import com.sip.client.conn.UdpClient
-import com.sip.client.model.Head.HeaderRegister
+import com.sip.client.model.Head.{HeaderInvite, HeaderRegister}
 import com.sip.client.model.Header._
 import com.sip.client.model.{SipMarshaller, Writers}
-import com.sip.client.model.SipMessages.{SipRegister, SipResponse}
+import com.sip.client.model.SipMessages.{SipInvite, SipRegister, SipRequest, SipResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import Writers._
+import com.sip.client.model.ModelUtils.commonSdp
 import com.sip.client.util.Util
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-class SipClient(server: String) {
+
+case class SipServer(ipServer: String)
+case class WhoAmI(user: String, pwd: String, ip: String, userAgent: String)
+
+class SipClient(sipServer: SipServer, whoAmI: WhoAmI) {
+
+  val udpClient = new UdpClient(sipServer.ipServer)
 
   val callId = UUID.randomUUID().toString
   val viaId = UUID.randomUUID().toString
 
-  def register(user: String, userIp: String): Unit =
+  var authorization : Option[Authorization] = None
+
+  def invite(to: String): Future[SipResponse] = {
+
+    val sipInvite = SipInvite(
+      HeaderInvite(to),
+      Via(whoAmI.ip, 60026, viaId, None, None),
+      MaxForward(70),
+      From(s"${whoAmI.user}@${sipServer.ipServer}", UUID.randomUUID().toString),
+      To(s"${to}", ""),
+      CallId(callId),
+      CSeq("25762 INVITE"),
+      UserAgent(whoAmI.userAgent),
+      Contact(whoAmI.user, whoAmI.ip, 60026),
+      Expires(20),
+      Allow( Seq("PRACK", "INVITE", "ACK", "BYE", "CANCEL", "UPDATE", "INFO", "NOTIFY", "REFER", "MESSAGE", "OPTIONS") ),
+      ContentLength(0),
+      authorization,
+      Supported(List("replaces 100res", "timer")),
+      ContentType("application/sdp"),
+      commonSdp("172.18.0.1")
+    )
+
+
+    val rsp =
+      udpClient.sendAndReceive(SipMarshaller.write(sipInvite))
+        .map( SipMarshaller.read )
+        .flatMap( x => x match {
+          case a: SipResponse if(a.sipResponse.code == 401) =>
+            authenticate(sipInvite, x, "INVITE", s"sip:${to}")
+          case a: SipResponse if(a.sipResponse.code == 201) => Future(x)
+        });
+
+    rsp.onComplete(
+      x => x match {
+        case Failure(a) => a.printStackTrace()
+        case Success(a) => println(a)
+      }
+    )
+    rsp
+
+  }
+
+  def register(): Future[SipResponse] =
   {
     val sipRegister = SipRegister(
-      HeaderRegister(server),
-      Via(userIp, 60026, viaId, None, None),
+      HeaderRegister(sipServer.ipServer),
+      Via(whoAmI.ip, 60026, viaId, None, None),
       MaxForward(70),
-      From(user, UUID.randomUUID().toString),
-      To(user, ""),
+      From(whoAmI.user, UUID.randomUUID().toString),
+      To(s"${whoAmI.user}@${whoAmI.ip}", ""),
       CallId(callId),
       CSeq("25762 REGISTER"),
-      UserAgent("AGEphone/1.1.0 (Darwin10.13.2; x86_64)"),
-      Contact(user.split("@")(0), userIp, 60026),
+      UserAgent(whoAmI.userAgent),
+      Contact(whoAmI.user, whoAmI.ip, 60026),
       Expires(600),
       Allow( Seq("PRACK", "INVITE", "ACK", "BYE", "CANCEL", "UPDATE", "INFO", "NOTIFY", "REFER", "MESSAGE", "OPTIONS") ),
       ContentLength(0)
     )
 
-    val udpClient = new UdpClient(server)
 
     val rsp =
       udpClient.sendAndReceive(SipMarshaller.write(sipRegister))
         .map( SipMarshaller.read )
         .flatMap( x => x match {
             case a: SipResponse if(a.sipResponse.code == 401) =>
-              authenticate(udpClient, sipRegister, x, "uno", "uno", "sip:localhost")
+              authenticate(sipRegister, x, "REGISTER", s"sip:${whoAmI.ip}")
             case a: SipResponse if(a.sipResponse.code == 201) => Future(x)
           });
 
@@ -55,53 +104,75 @@ class SipClient(server: String) {
         case Success(a) => println(a)
       }
     )
-
-
-    Thread.sleep(10000)
+    rsp
   }
 
   def authenticate(
-                 udpClient: UdpClient,
-                 req: SipRegister,
-                 rsp: SipResponse,
-                 username: String,
-                 pwd: String,
-                 uri: String): Future[SipResponse] = {
+                    req: SipRequest,
+                    rsp: SipResponse,
+                    method: String,
+                    uri: String): Future[SipResponse] = {
+
     val wauth = rsp.wWWAuthenticate
-    val response = Util.digest(
-      wauth.get.real,
-      wauth.get.nonce,
-      username,
-      pwd,
-      "REGISTER",
-      uri )
 
-    val authorization = Some(Authorization(
-      username,
-      wauth.get.real,
-      wauth.get.nonce,
-      uri,
-      response,
-      "MD5" ))
+    val authorization = autorizationHeader(uri, method, wauth.get)
 
-    val sipRegister = SipRegister(
-      req.head,
-      req.via,
-      req.maxForwards,
-      req.from,
-      req.to,
-      req.callId,
-      req.cseq,
-      req.userAgent,
-      req.contact,
-      req.expires,
-      req.allow,
-      req.contentLength,
-      authorization )
+    val authRequest : SipRequest = req match {
+      case sr: SipRegister => SipRegister(
+        sr.head,
+        sr.via,
+        sr.maxForwards,
+        sr.from,
+        sr.to,
+        sr.callId,
+        sr.cseq,
+        sr.userAgent,
+        sr.contact,
+        sr.expires,
+        sr.allow,
+        sr.contentLength,
+        authorization )
+      case sr: SipInvite => SipInvite(
+        sr.head,
+        sr.via,
+        sr.maxForwards,
+        sr.from,
+        sr.to,
+        sr.callId,
+        sr.cseq,
+        sr.userAgent,
+        sr.contact,
+        sr.expires,
+        sr.allow,
+        sr.contentLength,
+        authorization,
+        sr.supported,
+        sr.contentType,
+        sr.sdp
+      )
+    }
 
-    udpClient.sendAndReceive(SipMarshaller.write(sipRegister))
+
+    udpClient.sendAndReceive(SipMarshaller.write(authRequest))
       .map( SipMarshaller.read )
   }
 
 
+  private def autorizationHeader(uri: String, method: String, wauth: WAuthenticateChallenge) = {
+    val response = Util.digest(
+      wauth.real,
+      wauth.nonce,
+      whoAmI.user,
+      whoAmI.pwd,
+      method,
+      uri)
+
+    Some(Authorization(
+      whoAmI.user,
+      wauth.real,
+      wauth.nonce,
+      uri,
+      response,
+      "MD5"))
+  }
 }
