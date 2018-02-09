@@ -52,7 +52,7 @@ class SipWriterInviteSpec extends FlatSpec with Matchers {
       From("dos@localhost", "JgsOX.QTyT3cy-ecmWnMpV3PF8IjeUZB"),
       To("dos@localhost", ""),
       CallId("dwCHaLd6VNXbcmBHJelyTgPRmFy8iB6p"),
-      CSeq("25762 INVITE"),
+      CSeq(25762, "INVITE"),
       UserAgent("AGEphone/1.1.0 (Darwin10.13.2; x86_64)"),
       Contact("dos", "192.168.1.132", 60026),
       Expires(20),

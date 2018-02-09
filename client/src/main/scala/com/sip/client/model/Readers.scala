@@ -31,7 +31,7 @@ object Read {
 object Readers {
 
   def headResponse(a: String) : HeaderResponse = {
-    val pat = raw"SIP/2.0 (.+) (.+)".r
+    val pat = raw"SIP/2.0 (.+?) (.+)".r
 
     a.trim match {
       case pat(a, b) => HeaderResponse(a.toInt, b)
@@ -87,8 +87,8 @@ object Readers {
   def cSeq(str: Seq[String]) = header(
     str,
     "CSeq",
-    raw"""(.+)""".r,
-    a => CSeq(a(0)) )
+    raw"""(.+) (.+)""".r,
+    a => CSeq(a(0).toInt, a(1)) )
 
   def server(str: Seq[String]) = header(
     str,

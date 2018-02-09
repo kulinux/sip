@@ -33,7 +33,7 @@ object Writers {
   implicit val from = new SimpleHeader[From]("From",  x => s"sip:${x.from};tag=${x.tag}" )
   implicit val to = new SimpleHeader[To]("To",  x => s"sip:${x.to}")
   implicit val callId = new SimpleHeader[CallId]("Call-Id", _.callId )
-  implicit val cSeq = new SimpleHeader[CSeq]("CSeq", x => s"${x.cSeq}")
+  implicit val cSeq = new SimpleHeader[CSeq]("CSeq", x => s"${x.cSeq} ${x.method}")
   implicit val userAgent = new SimpleHeader[UserAgent]("User-Agent", _.userAgent)
   implicit val contact =  new SimpleHeader[Contact]("Contact", x => s"<sip:${x.user}@${x.ip}:${x.port};ob>")
   implicit val expires =  new SimpleHeader[Expires]("Expires", _.expires.toString)

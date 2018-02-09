@@ -14,7 +14,7 @@ object Header {
   case class From(from: String, tag: String)
   case class To(to: String, tag: String)
   case class CallId(callId: String)
-  case class CSeq(cSeq: String)
+  case class CSeq(cSeq: Int, method: String)
   case class UserAgent(userAgent: String)
   case class Contact(user: String, ip: String, port: Int)
   case class Expires(expires: Int)

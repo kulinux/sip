@@ -24,6 +24,8 @@ class SipClient(sipServer: SipServer, whoAmI: WhoAmI) {
 
   val udpClient = new UdpClient(sipServer.ipServer)
 
+  var sequence = 1
+
   val callId = UUID.randomUUID().toString
   val viaId = UUID.randomUUID().toString
 
@@ -38,7 +40,7 @@ class SipClient(sipServer: SipServer, whoAmI: WhoAmI) {
       From(s"${whoAmI.user}@${sipServer.ipServer}", UUID.randomUUID().toString),
       To(s"${to}", ""),
       CallId(callId),
-      CSeq("25762 INVITE"),
+      CSeq(sequence, "INVITE"),
       UserAgent(whoAmI.userAgent),
       Contact(whoAmI.user, whoAmI.ip, 60026),
       Expires(20),
@@ -49,6 +51,8 @@ class SipClient(sipServer: SipServer, whoAmI: WhoAmI) {
       ContentType("application/sdp"),
       commonSdp("172.18.0.1")
     )
+
+
 
 
     val rsp =
@@ -79,7 +83,7 @@ class SipClient(sipServer: SipServer, whoAmI: WhoAmI) {
       From(whoAmI.user, UUID.randomUUID().toString),
       To(s"${whoAmI.user}@${whoAmI.ip}", ""),
       CallId(callId),
-      CSeq("25762 REGISTER"),
+      CSeq(sequence, "REGISTER"),
       UserAgent(whoAmI.userAgent),
       Contact(whoAmI.user, whoAmI.ip, 60026),
       Expires(600),
@@ -125,7 +129,7 @@ class SipClient(sipServer: SipServer, whoAmI: WhoAmI) {
         sr.from,
         sr.to,
         sr.callId,
-        sr.cseq,
+        CSeq(sr.cseq.cSeq + 1, sr.cseq.method),
         sr.userAgent,
         sr.contact,
         sr.expires,
@@ -139,7 +143,7 @@ class SipClient(sipServer: SipServer, whoAmI: WhoAmI) {
         sr.from,
         sr.to,
         sr.callId,
-        sr.cseq,
+        CSeq(sr.cseq.cSeq + 1, sr.cseq.method),
         sr.userAgent,
         sr.contact,
         sr.expires,
