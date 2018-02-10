@@ -49,7 +49,7 @@ class SipClient(sipServer: SipServer, whoAmI: WhoAmI) {
       authorization,
       Supported(List("replaces 100res", "timer")),
       ContentType("application/sdp"),
-      commonSdp("172.18.0.1")
+      commonSdp(whoAmI.ip)
     )
 
 

@@ -20,7 +20,7 @@ object SipClientIt extends App {
     */
 
   //val rsp = sipClient.register()
-  val rsp = sipClient.invite("22222@localhost")
+  val rsp = sipClient.invite("111@localhost")
 
   rsp.onComplete( println )
 

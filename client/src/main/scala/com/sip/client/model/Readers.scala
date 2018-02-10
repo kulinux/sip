@@ -72,11 +72,29 @@ object Readers {
     raw"""<?sip:(.+)>?;tag=(\w+)""".r,
     a => From(a(0), a(1)) )
 
+  def to(str: Seq[String]) = {
+    val FirstGroup = raw"<?sip:([\w|@]+)>?".r
+    val SecondGroup = raw"tag=(.+)?".r
+
+    val hl = str.filter( _.startsWith("To") )(0)
+
+    val res = hl.replaceAll("To: ", "").split(";")
+
+    val captured1 = FirstGroup.findAllIn( res(0) ).matchData flatMap ( _.subgroups )
+    if(res.size == 1) {
+      Some(To(captured1.toList(0), ""))
+    } else {
+      val captured2 = SecondGroup.findAllIn( res(1) ).matchData flatMap ( _.subgroups )
+      Some(To(captured1.toList(0), captured2.toList(0)))
+    }
+  }
+  /*
   def to(str: Seq[String]) = header(
     str,
     "To",
-    raw"""<?sip:(.+)>?;tag=(\w+)""".r,
+    raw"""<?sip:(.+?)>?(;tag=(\w+))?""".r,
     a => To(a(0), a(1)) )
+    */
 
   def callId(str: Seq[String]) = header(
     str,

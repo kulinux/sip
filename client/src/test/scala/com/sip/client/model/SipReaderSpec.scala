@@ -30,6 +30,19 @@ class SipReaderSpec extends FlatSpec with Matchers {
 
   }
 
+  "Reader of to" should "read with or without tag" in {
+    val withTag = raw"To: <sip:dos@localhost>;tag=as7331f229"
+    val withoutTag = raw"To: <sip:dos@localhost>"
+    val withoutDiamant = raw"To: sip:dos@localhost"
+
+    Readers.to(Seq(withTag)).get.to should be ("dos@localhost")
+
+    Readers.to(Seq(withoutTag)).get.to should be ("dos@localhost")
+
+    Readers.to(Seq(withoutDiamant)).get.to should be ("dos@localhost")
+
+  }
+
   "Marshaller" should "read authentication header" in {
     val authStr = """WWW-Authenticate: Digest algorithm=MD5, realm="asterisk", nonce="211fd4cd""""
     val auth = Readers.wWWAuthenticate( Seq(authStr) )
