@@ -40,15 +40,16 @@ class UdpClient(host: String, port: Int = 5060) {
 
   def sendAndReceive(data: String) : Future[String] = Future {
 
-    val clientSocket: DatagramSocket = new DatagramSocket
     val IPAddress: InetAddress = this.address.getAddress
-    var sendData: Array[Byte] = data.getBytes()
-    val receiveData: Array[Byte] = new Array[Byte](1024)
 
+    var sendData: Array[Byte] = data.getBytes()
     val sendPacket: DatagramPacket = new DatagramPacket(sendData, sendData.length, IPAddress, address.getPort)
-    clientSocket.send(sendPacket)
+    socket.send(sendPacket)
+
+
+    val receiveData: Array[Byte] = new Array[Byte](1024)
     val receivePacket: DatagramPacket = new DatagramPacket(receiveData, receiveData.length)
-    clientSocket.receive(receivePacket)
+    socket.receive(receivePacket)
     val res = new String(receivePacket.getData, 0, receivePacket.getLength)
 
     println(data)
@@ -57,6 +58,15 @@ class UdpClient(host: String, port: Int = 5060) {
 
     res
 
+  }
+
+  def receiveMore() = {
+    val receiveData: Array[Byte] = new Array[Byte](1024)
+    val receivePacket: DatagramPacket = new DatagramPacket(receiveData, receiveData.length)
+    socket.receive(receivePacket)
+    val res = new String(receivePacket.getData, 0, receivePacket.getLength)
+
+    println(res)
   }
 
 

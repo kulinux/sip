@@ -13,12 +13,6 @@ object SipClientIt extends App {
     WhoAmI(user, pwd, myIp, "Scala Client")
   )
 
-
-  /*
-  val rsp = sipClient.register()
-    .map( x => sipClient.invite("22222@localhost") )
-    */
-
   //val rsp = sipClient.register()
   val rsp = sipClient.invite("111@localhost")
 

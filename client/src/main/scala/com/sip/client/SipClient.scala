@@ -71,7 +71,6 @@ class SipClient(sipServer: SipServer, whoAmI: WhoAmI) {
       }
     )
     rsp
-
   }
 
   def register(): Future[SipResponse] =
