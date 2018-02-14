@@ -120,39 +120,10 @@ class SipClient(sipServer: SipServer, whoAmI: WhoAmI) {
 
     val authorization = autorizationHeader(uri, method, wauth.get)
 
+
     val authRequest : SipRequest = req match {
-      case sr: SipRegister => SipRegister(
-        sr.head,
-        sr.via,
-        sr.maxForwards,
-        sr.from,
-        sr.to,
-        sr.callId,
-        CSeq(sr.cseq.cSeq + 1, sr.cseq.method),
-        sr.userAgent,
-        sr.contact,
-        sr.expires,
-        sr.allow,
-        sr.contentLength,
-        authorization )
-      case sr: SipInvite => SipInvite(
-        sr.head,
-        sr.via,
-        sr.maxForwards,
-        sr.from,
-        sr.to,
-        sr.callId,
-        CSeq(sr.cseq.cSeq + 1, sr.cseq.method),
-        sr.userAgent,
-        sr.contact,
-        sr.expires,
-        sr.allow,
-        sr.contentLength,
-        authorization,
-        sr.supported,
-        sr.contentType,
-        sr.sdp
-      )
+      case sr: SipRegister => sr.copy(cseq = CSeq(sr.cseq.cSeq + 1, sr.cseq.method), authorization = authorization )
+      case sr: SipInvite => sr.copy(cseq = CSeq(sr.cseq.cSeq + 1, sr.cseq.method), authorization = authorization )
     }
 
 
