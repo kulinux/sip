@@ -3,9 +3,14 @@ package com.sip.client.model
 
 
 object Head {
-  case class HeaderRegister(server: String)
+  trait HeaderRequest {
+    val method : String;
+  }
+
+  case class HeaderRegister(server: String, method : String = "REGISTER") extends HeaderRequest
+  case class HeaderInvite(user: String, method: String = "INVITE") extends HeaderRequest
+
   case class HeaderResponse(code: Int, msg: String)
-  case class HeaderInvite(user: String)
 
 }
 
@@ -58,6 +63,7 @@ object SipMessages {
   )
 
   trait SipRequest {
+    val head: HeaderRequest
     val via: Via
     val maxForwards: MaxForward
     val from: From

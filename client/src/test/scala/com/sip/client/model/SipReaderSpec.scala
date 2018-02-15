@@ -17,8 +17,26 @@ class SipReaderSpec extends FlatSpec with Matchers {
       |WWW-Authenticate: Digest algorithm=MD5, realm="asterisk", nonce="211fd4cd"
       |Content-Length: 0""".stripMargin
 
+  val sipTrying =
+    """SIP/2.0 180 Ringing
+      |Via: SIP/2.0/UDP 192.168.1.132:60026;branch=5aed7eee-e441-4222-96d8-34e1f774c63e;received=172.18.0.1;rport=48057
+      |From: sip:dos@localhost;tag=df9c75be-15eb-4c17-9be8-4a8e70b26470
+      |To: sip:111@localhost;tag=as06e7af15
+      |Call-ID: 177a5d24-9985-4c69-b738-95f3d9f7f21d
+      |CSeq: 2 INVITE
+      |Server: Asterisk PBX certified/11.6-cert16
+      |Allow: INVITE, ACK, CANCEL, OPTIONS, BYE, REFER, SUBSCRIBE, NOTIFY, INFO, PUBLISH
+      |Supported: replaces, timer
+      |Contact: <sip:111@172.18.0.2:5060>
+      |Content-Length: 0""".stripMargin
+
   "Marshaller" should "read msg" in {
     val msg = SipMarshaller.read(msgStr)
+    println(msg)
+  }
+
+  "Marshaller" should "read trying" in {
+    val msg = SipMarshaller.read(sipTrying)
     println(msg)
   }
 

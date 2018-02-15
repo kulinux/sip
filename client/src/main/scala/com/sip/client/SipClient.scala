@@ -53,23 +53,20 @@ class SipClient(sipServer: SipServer, whoAmI: WhoAmI) {
     )
 
 
-
-
     val rsp =
       udpClient.sendAndReceive(SipMarshaller.write(sipInvite))
         .map( SipMarshaller.read )
-        .flatMap( x => x match {
-          case a: SipResponse if(a.sipResponse.code == 401) =>
-            authenticate(sipInvite, x, "INVITE", s"sip:${to}")
-          case a: SipResponse if(a.sipResponse.code == 201) => Future(x)
-        });
+        .flatMap( x => authenticateIfNecessary(sipInvite, x) )
 
-    rsp.onComplete(
-      x => x match {
-        case Failure(a) => a.printStackTrace()
-        case Success(a) => println(a)
+
+    var afterRing = rsp.map( waitForSomethingInteresting )
+
+    afterRing.onComplete( x => x match {
+      case Failure(a) => a.printStackTrace()
+      case Success(a) => {
+       println(a)
       }
-    )
+    })
     rsp
   }
 
@@ -94,31 +91,44 @@ class SipClient(sipServer: SipServer, whoAmI: WhoAmI) {
     val rsp =
       udpClient.sendAndReceive(SipMarshaller.write(sipRegister))
         .map( SipMarshaller.read )
-        .flatMap( x => x match {
-            case a: SipResponse if(a.sipResponse.code == 401) =>
-              authenticate(sipRegister, x, "REGISTER", s"sip:${whoAmI.ip}")
-            case a: SipResponse if(a.sipResponse.code == 201) => Future(x)
-          });
+        .flatMap( x => authenticateIfNecessary(sipRegister, x) );
 
 
     rsp.onComplete(
       x => x match {
         case Failure(a) => a.printStackTrace()
-        case Success(a) => println(a)
+        case Success(a) => {
+          println(a)
+        }
       }
     )
     rsp
   }
 
+  def waitForSomethingInteresting(rsp: SipResponse) = {
+    var nextMsg = SipMarshaller.read(udpClient.receiveMore())
+    while (nextMsg.sipResponse.code.toString.startsWith("1")) {
+      nextMsg = SipMarshaller.read(udpClient.receiveMore())
+    }
+    nextMsg
+  }
+
+  def authenticateIfNecessary(sipRequest: SipRequest, sipResponse: SipResponse) = {
+    sipResponse match {
+      case a: SipResponse if(a.sipResponse.code == 401) =>
+        authenticate(sipRequest, a, s"sip:${whoAmI.ip}")
+      case a: SipResponse if(a.sipResponse.code == 201) => Future(a)
+    }
+  }
+
   def authenticate(
                     req: SipRequest,
                     rsp: SipResponse,
-                    method: String,
                     uri: String): Future[SipResponse] = {
 
     val wauth = rsp.wWWAuthenticate
 
-    val authorization = autorizationHeader(uri, method, wauth.get)
+    val authorization = autorizationHeader(uri, req.head.method, wauth.get)
 
 
     val authRequest : SipRequest = req match {

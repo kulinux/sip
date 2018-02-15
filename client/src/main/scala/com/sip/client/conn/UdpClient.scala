@@ -65,8 +65,8 @@ class UdpClient(host: String, port: Int = 5060) {
     val receivePacket: DatagramPacket = new DatagramPacket(receiveData, receiveData.length)
     socket.receive(receivePacket)
     val res = new String(receivePacket.getData, 0, receivePacket.getLength)
-
     println(res)
+    res
   }
 
 

@@ -21,11 +21,11 @@ object Writers {
   }
 
   implicit object HeaderRegisterW extends Writer[HeaderRegister] {
-    override def write(a: HeaderRegister): String = s"REGISTER sip:${a.server} SIP/2.0"
+    override def write(a: HeaderRegister): String = s"${a.method} sip:${a.server} SIP/2.0"
   }
 
   implicit object HeaderInviteW extends Writer[HeaderInvite] {
-    override def write(a: HeaderInvite): String = s"INVITE sip:${a.user} SIP/2.0"
+    override def write(a: HeaderInvite): String = s"${a.method} sip:${a.user} SIP/2.0"
   }
 
   implicit val via = new SimpleHeader[Via]("Via", x => s"SIP/2.0/UDP ${x.ip}:${x.port};rport;branch=${x.branch}")
